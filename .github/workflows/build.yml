@@ -27,13 +27,22 @@ jobs:
       - name: Set up Android SDK (using preinstalled SDK)
         run: |
           export ANDROID_HOME=/usr/local/lib/android/sdk
+          export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
           export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
           echo "y" | sdkmanager --licenses >/dev/null 2>&1 || true
           sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
 
+      - name: Copy SDK to Buildozer expected location
+        run: |
+          mkdir -p ~/.buildozer/android/platform
+          # Если папка уже существует, удалим её, чтобы создать ссылку
+          rm -rf ~/.buildozer/android/platform/android-sdk
+          ln -s /usr/local/lib/android/sdk ~/.buildozer/android/platform/android-sdk
+
       - name: Build APK
         run: |
           export ANDROID_HOME=/usr/local/lib/android/sdk
+          export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
           export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
           buildozer android debug
 
