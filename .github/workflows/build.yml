@@ -24,15 +24,17 @@ jobs:
       - name: Install buildozer
         run: pip install buildozer cython
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: platform-tools build-tools;30.0.3 platforms;android-30
-          cmdline-tools-version: 8.0  # latest stable
+      - name: Set up Android SDK (using preinstalled SDK)
+        run: |
+          export ANDROID_HOME=/usr/local/lib/android/sdk
+          export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+          echo "y" | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
 
       - name: Build APK
         run: |
-          export ANDROID_SDK_ROOT=$ANDROID_HOME
+          export ANDROID_HOME=/usr/local/lib/android/sdk
+          export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
           buildozer android debug
 
       - name: Upload APK
