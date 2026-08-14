@@ -17,20 +17,22 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt update
-          sudo apt install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libffi-dev libssl-dev
+          sudo apt install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libffi-dev libssl-dev wget
       - name: Install buildozer
         run: pip install buildozer cython
       - name: Install Android SDK (build-tools)
         run: |
           mkdir -p ~/.buildozer/android/platform
           cd ~/.buildozer/android/platform
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+          wget -q --show-progress https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+          if [ ! -f cmdline-tools.zip ]; then echo "❌ Download failed"; exit 1; fi
           unzip -q cmdline-tools.zip
           mkdir -p android-sdk/cmdline-tools
           mv cmdline-tools/* android-sdk/cmdline-tools/
           export ANDROID_SDK_ROOT=~/.buildozer/android/platform/android-sdk
           export PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/bin
-          yes | sdkmanager --licenses >/dev/null 2>&1
+          # Принимаем лицензии (echo y вместо yes)
+          echo y | sdkmanager --licenses || true
           sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
       - name: Build APK
         run: |
